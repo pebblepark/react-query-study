@@ -1,29 +1,16 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import React from 'react';
+import { useQuery } from 'react-query';
+
+interface Response {
+    url?: string;
+}
 
 function App() {
-    const [isLoading, setLoading] = useState(false);
-    const [isError, setError] = useState(false);
-    const [data, setData] = useState<{ url?: string }>({});
-
-    useEffect(() => {
-        const fetchData = async () => {
-            setError(false);
-            setLoading(true);
-
-            try {
-                const response = await axios('https://random.dog/woof.json');
-
-                setData(response.data);
-            } catch (error) {
-                setError(true);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchData();
-    }, []);
+    const { isLoading, isError, data } = useQuery<Response, Error>('dogs', () =>
+        axios('https://random.dog/woof.json').then(response => response.data)
+    );
 
     if (isError) return <h1>Error, try again...!</h1>;
     if (isLoading) return <h1>Loading...</h1>;
